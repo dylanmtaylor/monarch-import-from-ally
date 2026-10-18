@@ -61,13 +61,15 @@ class AllyAccountHistory:
                     self.transactions.append(t)
 
     def compute_daily_balances(
-        self, end_date: Optional[date] = None
+        self, end_date: Optional[date] = None, from_first_statement: bool = False
     ) -> List[Dict[str, Any]]:
         """
         Compute continuous daily balance history forward-filled from inception to end_date.
         
         Args:
             end_date: Last date to compute balances for (defaults to today).
+            from_first_statement: If True, start daily history at the earliest verified statement date
+                                 rather than forward-filling from open_date when older statements are missing.
             
         Returns:
             List of {"date": "YYYY-MM-DD", "balance": float} for every single day.
@@ -77,7 +79,7 @@ class AllyAccountHistory:
 
         # Determine start date
         start_d: Optional[date] = None
-        if self.open_date:
+        if self.open_date and not from_first_statement:
             try:
                 start_d = parse_date(self.open_date)
             except Exception:
@@ -101,7 +103,9 @@ class AllyAccountHistory:
                 earliest_stmt_date = parse_date(first_stmt["statement_date"])
                 initial_balance = first_stmt.get("end_bal", 0.0)
 
-        if not start_d:
+        if from_first_statement and earliest_stmt_date:
+            start_d = earliest_stmt_date
+        elif not start_d:
             start_d = earliest_stmt_date or date(2020, 1, 1)
 
         # Make sure start_d is not in future

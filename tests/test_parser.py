@@ -138,6 +138,33 @@ class TestParser(unittest.TestCase):
         self.assertEqual(accounts["xxxxxx1111"].account_name, "Savings Account")
         self.assertEqual(accounts["xxxxxx2222"].product, "No Penalty CD")
 
+    def test_compute_daily_balances_from_first_statement(self):
+        """Test starting daily balance calculation on earliest statement rather than open_date."""
+        acct = AllyAccountHistory(
+            account_name="Savings Account",
+            account_number="xxxxxx9999",
+            product="Savings Account",
+            open_date="01/01/2014",  # Far in the past with no statements
+        )
+        stmt = {
+            "statement_date": "01/15/2020",
+            "beg_date": "12/16/2019",
+            "beg_bal": 100.00,
+            "end_date": "01/15/2020",
+            "end_bal": 100.00,
+            "transactions": [],
+        }
+        acct.add_statement(stmt)
+
+        # Normal mode starts at open_date
+        daily_open = acct.compute_daily_balances(end_date=date(2020, 1, 15), from_first_statement=False)
+        self.assertEqual(daily_open[0]["date"], "2014-01-01")
+
+        # from_first_statement starts at earliest statement beg_date (2019-12-16)
+        daily_stmt = acct.compute_daily_balances(end_date=date(2020, 1, 15), from_first_statement=True)
+        self.assertEqual(daily_stmt[0]["date"], "2019-12-16")
+        self.assertEqual(daily_stmt[0]["balance"], 100.00)
+
 
 if __name__ == "__main__":
     unittest.main()

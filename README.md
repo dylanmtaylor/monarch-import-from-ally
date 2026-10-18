@@ -62,11 +62,20 @@ ally-to-monarch all
 python3 -m ally_to_monarch.cli all
 ```
 
-To re-parse already downloaded statement PDFs without hitting the network:
-
 ```bash
 ally-to-monarch parse-statements --statement-dir statements --output-dir output
 ```
+
+To clip balance history to start on the earliest verified statement date (avoiding synthetic forward-fill for years without statement coverage):
+
+```bash
+ally-to-monarch all --from-first-statement
+# or with parse-statements:
+ally-to-monarch parse-statements --from-first-statement
+```
+
+### Backfilling Historical Statements
+Ally Bank's online self-service repository retains statements for up to 7 years. If you possess older statement PDFs from personal records or archived files (e.g. prior to 2020), dropping them into `statements/` and running `ally-to-monarch parse-statements` will automatically extract their transactions and stitch their balances into the continuous daily series.
 
 ---
 

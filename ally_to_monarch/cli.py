@@ -20,6 +20,7 @@ def run_pipeline(
     workers: int = 8,
     years: Optional[List[int]] = None,
     skip_download_if_present: bool = True,
+    from_first_statement: bool = False,
 ):
     """Run full automated pipeline from Chrome CDP to Monarch CSV export."""
     os.makedirs(statement_dir, exist_ok=True)
@@ -86,7 +87,7 @@ def run_pipeline(
 
     print(f"Found {len(accounts)} unique Ally Bank account(s).")
     exporter = Exporter(output_dir=output_dir)
-    exporter.export_all(accounts)
+    exporter.export_all(accounts, from_first_statement=from_first_statement)
 
 
 def main():
@@ -104,11 +105,13 @@ def main():
     p_all.add_argument("--statement-dir", type=str, default="statements", help="Directory to cache statement PDFs (default: statements)")
     p_all.add_argument("--workers", type=int, default=8, help="Worker threads for downloads (default: 8)")
     p_all.add_argument("--years", type=str, default=None, help="Comma-separated years to fetch (e.g. 2020,2021,2022)")
+    p_all.add_argument("--from-first-statement", action="store_true", help="Start daily balance history on earliest verified statement date rather than open_date")
 
     # Command: parse-statements
     p_parse = subparsers.add_parser("parse-statements", help="Parse already downloaded statement PDFs and export CSVs")
     p_parse.add_argument("--statement-dir", type=str, default="statements", help="Directory containing statement PDFs")
     p_parse.add_argument("--output-dir", type=str, default="output", help="Directory for Monarch CSVs")
+    p_parse.add_argument("--from-first-statement", action="store_true", help="Start daily balance history on earliest verified statement date rather than open_date")
 
     args = parser.parse_args()
 
@@ -123,6 +126,7 @@ def main():
             statement_dir=getattr(args, "statement_dir", "statements"),
             workers=getattr(args, "workers", 8),
             years=years_list,
+            from_first_statement=getattr(args, "from_first_statement", False),
         )
     elif args.command == "parse-statements":
         pdf_files = sorted(glob.glob(os.path.join(args.statement_dir, "*.pdf")))
@@ -137,7 +141,7 @@ def main():
 
         accounts = aggregate_statements(all_parsed)
         exporter = Exporter(output_dir=args.output_dir)
-        exporter.export_all(accounts)
+        exporter.export_all(accounts, from_first_statement=getattr(args, "from_first_statement", False))
     else:
         parser.print_help()
 

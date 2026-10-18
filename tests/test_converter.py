@@ -17,11 +17,11 @@ class TestConverter(unittest.TestCase):
         """Test merchant cleaning and extraction."""
         self.assertEqual(clean_merchant_name("Interest Paid"), "Ally Bank Interest")
         self.assertEqual(
-            clean_merchant_name("NOW Withdrawal Requested transfer to Dylan (TRUIST BANK Checking 1234)"),
+            clean_merchant_name("NOW Withdrawal Requested transfer to Jane (TRUIST BANK Checking 1234)"),
             "Truist Bank Transfer",
         )
         self.assertEqual(
-            clean_merchant_name("ACH Withdrawal Requested transfer to DYLAN (BLUE RIDGE BANK, NA Checking 0538) $TRANSFER"),
+            clean_merchant_name("ACH Withdrawal Requested transfer to JANE (BLUE RIDGE BANK, NA Checking 0000) $TRANSFER"),
             "Blue Ridge Bank Transfer",
         )
         self.assertEqual(
@@ -29,7 +29,7 @@ class TestConverter(unittest.TestCase):
             "Primis Bank Transfer",
         )
         self.assertEqual(
-            clean_merchant_name("ACH Deposit Requested transfer from DYLAN Ally Bank Transfer DYLAN P2P"),
+            clean_merchant_name("ACH Deposit Requested transfer from JANE Ally Bank Transfer JANE P2P"),
             "Ally P2P Transfer",
         )
         self.assertEqual(

@@ -13,10 +13,16 @@ class Exporter:
     def __init__(self, output_dir: str = "output"):
         self.output_dir = output_dir
 
-    def export_all(self, accounts: Dict[str, AllyAccountHistory]) -> Dict[str, Any]:
+    def export_all(
+        self, accounts: Dict[str, AllyAccountHistory], from_first_statement: bool = False
+    ) -> Dict[str, Any]:
         """
         Export balance and transaction CSVs for all accounts.
         
+        Args:
+            accounts: Dictionary of AllyAccountHistory objects.
+            from_first_statement: If True, balance history starts from the earliest verified statement date.
+            
         Returns:
             Dict containing generated file paths and metrics.
         """
@@ -39,7 +45,7 @@ class Exporter:
             display_name = f"Ally - {acct.account_name} ({acct.account_number})"
 
             # 1. Compute and export daily balances
-            daily_balances = acct.compute_daily_balances()
+            daily_balances = acct.compute_daily_balances(from_first_statement=from_first_statement)
             bal_csv = convert_balances_to_csv(daily_balances)
             bal_file = os.path.join(self.output_dir, f"ally_balances_{slug}.csv")
             with open(bal_file, "w", encoding="utf-8") as f:

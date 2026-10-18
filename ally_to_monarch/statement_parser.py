@@ -36,7 +36,7 @@ class StatementParser:
             # Example:
             # Savings Account
             # Summary For:
-            # Dylan M Taylor
+            # Sample User
             # Account Number:  xxxxxx1234
             # Open Date:  08/23/2014
             # Product:  Savings Account
